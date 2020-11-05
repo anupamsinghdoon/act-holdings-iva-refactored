@@ -1,0 +1,104 @@
+const axios = require('axios');
+const API_ENDPOINT = 'https://learn-anupam-9787-dev.twil.io/simulateAPI';
+exports.handler = async function (context, event, callback) { 
+  const Say = "Thanks for calling. Good bye.";
+  const Listen = false;
+  const Remember = false;
+  const Collect = false;
+  const Tasks = false;
+  const Redirect = false;
+  let Handoff = false;
+
+  const Memory = JSON.parse(event.Memory);
+
+  responseBuilder(Say, Listen, Remember, Collect, Tasks, Redirect, Handoff, callback);
+} 
+const responseBuilder = (Say, Listen, Remember, Collect, Tasks, Redirect, Handoff, callback) => {
+
+  let responseObject = {
+  "actions": []
+  };
+
+  if ( Say ) {
+      responseObject.actions.push(
+          {
+              "say": {
+                  "speech": Say
+              }
+          }
+      );
+  }
+  
+  if ( Listen ) {
+      if ( Tasks ) {
+          responseObject.actions.push(
+              { 
+                  "listen": {
+                      "tasks" : Tasks
+                  } 
+              }
+          );
+      }
+      else {
+          responseObject.actions.push(
+              { 
+                  "listen": true 
+              }
+          );
+      }
+  }
+
+  if ( Remember ) {
+      responseObject.actions.push(
+          {
+              "remember" : Remember
+          }
+      );
+  }
+
+  if ( Collect ) {
+      responseObject.actions.push(
+          {
+              "collect" : Collect
+          }
+      );
+  }
+
+  if ( Redirect ) {
+      responseObject.actions.push(
+          {
+              "redirect" : Redirect
+          }
+      );
+  }
+
+  if ( Handoff ) {
+      if ( Handoff.type === 1 ) {
+          responseObject.actions.push(
+              {
+                  "handoff" : {
+                      "channel" : "voice",
+                      "uri" : Handoff.twiml_url,
+                      "method" : "POST"
+                  }
+              }
+          );
+      } else if ( Handoff.type === 2 ) {
+          responseObject.actions.push(
+              {
+                  "handoff" : {
+                      "channel" : "voice",
+                      "uri" : Handoff.task_router_url,
+                      "wait_url" : Handoff.wait_url,
+                      "wait_url_method" : Handoff.wait_url_method
+                  }
+              }
+          );
+      }
+  }
+
+  // return twilio function response
+  callback(null, responseObject);
+}
+
+  
